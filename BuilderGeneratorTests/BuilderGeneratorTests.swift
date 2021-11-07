@@ -34,6 +34,7 @@ struct Field: Codable {
 struct Struct: Codable {
     let name: String
     let fields: [Field]
+    var generics: String = ""
 }
 
 
@@ -49,14 +50,37 @@ struct StructParser {
             return nil
         }
         let fields = parseFields(body: body)
-        return Struct(name: name, fields: fields)
+        let generics = parseGenerics(str: str)
+        return Struct(name: name, fields: fields, generics: generics)
     }
-    
+
+    private func parseGenerics(str: Expression) -> String {
+        let signature = str.signature
+        if signature.contains("<") && signature.contains(">") {
+            let startIndex = signature.index(signature.startIndex, offsetBy: signature.range(of: "<")!.upperBound.encodedOffset)
+            let endIndex = signature.index(signature.startIndex, offsetBy: signature.range(of: ">")!.lowerBound.encodedOffset)
+            let range = startIndex..<endIndex
+            let generics = signature[range]
+            return "<\(String(generics))>"
+        } else {
+            return ""
+        }
+    }
+
     private func parseStructName(_ str: Expression) -> String {
-        return str.signature
-            .replacingOccurrences(of: "struct", with: "")
-            .split(separator: ":")[0]
-            .trimmingCharacters(in: .whitespaces)
+        let signatureWithoutStruct = str.signature.replacingOccurrences(of: "struct", with: "")
+        let hasGenerics = signatureWithoutStruct.contains("<")
+        if hasGenerics {
+            return signatureWithoutStruct
+                .split(separator: "<")[0]
+                .trimmingCharacters(in: .whitespaces)
+               
+        } else {
+            return signatureWithoutStruct
+                .split(separator: ":")[0]
+                .trimmingCharacters(in: .whitespaces)
+        }
+        
     }
     
     private func numberOfStructs(content: String) -> Int {
@@ -118,7 +142,7 @@ struct BuilderGenerator {
     
     private func generateBuilderStruct(str: Struct) -> String {
         var builder = ""
-        builder += "struct \(str.name)Builder {\n"
+        builder += "struct \(str.name)Builder\(str.generics) {\n"
         builder += str.fields.map { field in generateBuilderField(field: field) }.joined(separator: "\n")
         builder += generateBuildFunction(str: str)
         builder += "}\n"
@@ -444,6 +468,27 @@ class BuilderGeneratorTests: XCTestCase {
         // assert
         XCTAssertEqual(result.contains("var firstName: String?"), true)
         XCTAssertFalse(result.contains("fullName"))
+    }
+    
+    func test_generate_builder_can_handle_generics() {
+        // arrange
+        let content = """
+        struct ContentPage<T:Codable>: Codable {
+            var items: [T] = []
+            var paging: ContentPaging?
+        
+            enum CodingKeys: String, CodingKey {
+                case items = "data"
+                case paging = "paging"
+            }
+        }
+        """
+        // act
+        let result = BuilderGenerator().generateBuilder(file: content)
+        // assert
+        XCTAssertTrue(result.contains("var items: [T] = []"))
+        XCTAssertTrue(result.contains("var paging: ContentPaging?"))
+        XCTAssertTrue(result.contains("struct ContentPageBuilder<T:Codable> {"))
     }
     
 }

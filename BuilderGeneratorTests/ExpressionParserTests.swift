@@ -15,6 +15,7 @@ import XCTest
  signature: var property: String
  body: var someProperty: String
  */
+
 struct Expression {
     var signature: String
     var body: String?
@@ -85,9 +86,9 @@ func parseExpressions(content: String) -> [Expression] {
                 currentExpression.body?.append(remainder)
                 currentExpression.body?.append("\n")
             }
-
-            if currentExpression.body!.hasSuffix("}\n") {
-                currentExpression.body!.removeLast(2)
+            
+            if currentExpression.body?.hasSuffix("}\n") ?? false {
+                currentExpression.body?.removeLast(2)
             }
 
             expressions.append(currentExpression)
@@ -97,8 +98,6 @@ func parseExpressions(content: String) -> [Expression] {
     }
     return expressions
 }
-
-
 class ExpressionParserTests: XCTestCase {
     
     func test_parseExpressions_parses_simple_expressions() {

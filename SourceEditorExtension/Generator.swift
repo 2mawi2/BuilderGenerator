@@ -77,9 +77,9 @@ func parseExpressions(content: String) -> [Expression] {
                 currentExpression.body?.append(remainder)
                 currentExpression.body?.append("\n")
             }
-
-            if currentExpression.body!.hasSuffix("}\n") {
-                currentExpression.body!.removeLast(2)
+            
+            if currentExpression.body?.hasSuffix("}\n") ?? false {
+                currentExpression.body?.removeLast(2)
             }
 
             expressions.append(currentExpression)
@@ -91,6 +91,7 @@ func parseExpressions(content: String) -> [Expression] {
 }
 
 
+
 struct Field: Codable {
     let name: String
     let type: String
@@ -100,6 +101,7 @@ struct Field: Codable {
 struct Struct: Codable {
     let name: String
     let fields: [Field]
+    var generics: String = ""
 }
 
 
@@ -115,32 +117,43 @@ struct StructParser {
             return nil
         }
         let fields = parseFields(body: body)
-        return Struct(name: name, fields: fields)
+        let generics = parseGenerics(str: str)
+        return Struct(name: name, fields: fields, generics: generics)
     }
-    
+
+    private func parseGenerics(str: Expression) -> String {
+        let signature = str.signature
+        if signature.contains("<") && signature.contains(">") {
+            let startIndex = signature.index(signature.startIndex, offsetBy: signature.range(of: "<")!.upperBound.encodedOffset)
+            let endIndex = signature.index(signature.startIndex, offsetBy: signature.range(of: ">")!.lowerBound.encodedOffset)
+            let range = startIndex..<endIndex
+            let generics = signature[range]
+            return "<\(String(generics))>"
+        } else {
+            return ""
+        }
+    }
+
     private func parseStructName(_ str: Expression) -> String {
-        return str.signature
-            .replacingOccurrences(of: "struct", with: "")
-            .split(separator: ":")[0]
-            .trimmingCharacters(in: .whitespaces)
+        let signatureWithoutStruct = str.signature.replacingOccurrences(of: "struct", with: "")
+        let hasGenerics = signatureWithoutStruct.contains("<")
+        if hasGenerics {
+            return signatureWithoutStruct
+                .split(separator: "<")[0]
+                .trimmingCharacters(in: .whitespaces)
+               
+        } else {
+            return signatureWithoutStruct
+                .split(separator: ":")[0]
+                .trimmingCharacters(in: .whitespaces)
+        }
+        
     }
     
     private func numberOfStructs(content: String) -> Int {
         return content.components(separatedBy: "struct").count - 1
     }
     
-    private func splitSignatureAndBody(content: String) -> (String, String) {
-        var contentFromStruct = content
-        if let structRange = content.range(of: "struct") {
-            contentFromStruct.removeSubrange(content.startIndex..<structRange.upperBound)
-        }
-        let indexOfFirstBrace = contentFromStruct.firstIndex(of: "{")!
-        let signature = String(contentFromStruct[..<indexOfFirstBrace])
-        let body = String(contentFromStruct[indexOfFirstBrace...])
-        return (signature, body)
-    }
-    
-   
     private func parseFields(body: String) -> [Field] {
         var fields = [Field]()
         var bodyWithoutEnclosingBrackets = body
@@ -180,6 +193,7 @@ struct StructParser {
     
 }
 
+
 struct BuilderGenerator {
     
     func generateBuilder(file: String) -> String {
@@ -195,7 +209,7 @@ struct BuilderGenerator {
     
     private func generateBuilderStruct(str: Struct) -> String {
         var builder = ""
-        builder += "struct \(str.name)Builder {\n"
+        builder += "struct \(str.name)Builder\(str.generics) {\n"
         builder += str.fields.map { field in generateBuilderField(field: field) }.joined(separator: "\n")
         builder += generateBuildFunction(str: str)
         builder += "}\n"
@@ -257,4 +271,6 @@ struct BuilderGenerator {
     }
     
 }
+
+
 
