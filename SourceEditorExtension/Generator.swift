@@ -5,8 +5,6 @@
 //  Created by Marius Wichtner on 06.11.21.
 //
 
-import Foundation
-
 struct Expression {
     var signature: String
     var body: String?
@@ -24,38 +22,54 @@ extension String.SubSequence {
     }
 }
 
+private func calculateNewBracketCount(_ bracketCount: Int,_ text: String) -> Int {
+    var newBracketCount = bracketCount
+    newBracketCount += text.trim().components(separatedBy: "{").count - 1
+    newBracketCount -= text.trim().components(separatedBy: "}").count - 1
+    return newBracketCount
+}
+
+private func inComplexExpression(_ bracketCount: Int) -> Bool {
+    return bracketCount > 0
+}
+
+private func isSimpleExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
+    return !inComplexExpression(bracketCount) && !line.trim().isEmpty && !line.contains("{") && !line.contains("}")
+}
+
+private func isStartOfComplexExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
+    return !inComplexExpression(bracketCount) && line.contains("{")
+}
+
+private func isInComplexExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
+    return inComplexExpression(bracketCount) && !line.contains("}")
+}
+
+private func isEndOfComplexExpression(_ line: String.SubSequence, _ bracketCount: Int) -> Bool {
+    return line.contains("}") && bracketCount == 0
+}
 
 func parseExpressions(content: String) -> [Expression] {
-    let lines = content.split(separator: "\n")
     var expressions: [Expression] = []
     var currentExpression = Expression(signature: "", body: nil)
     var bracketCount = 0
-    func inComplexExpression() -> Bool {
-        return bracketCount > 0
-    }
-    func updateLineCounter(text: String) {
-        bracketCount += text.trim().components(separatedBy: "{").count - 1
-        bracketCount -= text.trim().components(separatedBy: "}").count - 1
-    }
-    for line in lines {
-        let isSimpleExpression = !inComplexExpression() && !line.trim().isEmpty && !line.contains("{") && !line.contains("}")
-        if isSimpleExpression {
+
+    for line in content.split(separator: "\n") {
+        if isSimpleExpression(bracketCount, line) {
             expressions.append(Expression(signature: String(line), body: nil))
             continue
         }
-        let isStartOfComplexExpression = !inComplexExpression() && line.contains("{")
-        if isStartOfComplexExpression {
+        if isStartOfComplexExpression(bracketCount, line) {
             bracketCount += 1
             currentExpression.signature = String(line[..<line.firstIndex(of: "{")!]).trim()
             // TODO check for end of expression again
             continue
         }
-        let isInComplexExpression = inComplexExpression() && !line.contains("}")
-        if isInComplexExpression {
+        if isInComplexExpression(bracketCount, line) {
             if currentExpression.body == nil {
                 currentExpression.body = ""
             }
-            updateLineCounter(text: String(line))
+            bracketCount = calculateNewBracketCount(bracketCount, String(line))
             currentExpression.body?.append(String(line.trim()))
             currentExpression.body?.append("\n")
         }
@@ -69,8 +83,7 @@ func parseExpressions(content: String) -> [Expression] {
                }
             }
         }
-        let isEndOfComplexExpression = line.contains("}") && bracketCount == 0
-        if isEndOfComplexExpression {
+        if isEndOfComplexExpression(line, bracketCount) {
             
             let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
             if !remainder.isEmpty {
@@ -139,16 +152,9 @@ struct StructParser {
     private func parseStructName(_ str: Expression) -> String {
         let signatureWithoutStruct = str.signature.replacingOccurrences(of: "struct", with: "")
         let hasGenerics = signatureWithoutStruct.contains("<")
-        if hasGenerics {
-            return signatureWithoutStruct
-                .split(separator: "<")[0]
-                .trimmingCharacters(in: .whitespaces)
-               
-        } else {
-            return signatureWithoutStruct
-                .split(separator: ":")[0]
-                .trimmingCharacters(in: .whitespaces)
-        }
+        return signatureWithoutStruct
+            .split(separator: hasGenerics ? "<" : ":")[0]
+            .trimmingCharacters(in: .whitespaces)
         
     }
     
@@ -276,4 +282,6 @@ struct BuilderGenerator {
     }
     
 }
+
+
 
