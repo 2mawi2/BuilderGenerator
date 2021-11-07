@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "ExpressionParserTests.test_generate_builder_can_handle_properties_of_sub_scope():ExpressionParserTests.swift">
+      </ContextState>
+      <ContextState
+         contextName = "parseExpressions(content:):ExpressionParserTests.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "String(line)">
+            </PersistentString>
+            <PersistentString
+               value = "currentExpression.body">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in implicit closure #1 in ExpressionParserTests.test_parseExpressions_parses_body_of_complex_expression():ExpressionParserTests.swift">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
