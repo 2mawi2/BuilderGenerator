@@ -1,4 +1,5 @@
 import XCTest
+import Foundation
 
 /*
  A script that reads a swift file and generates code for a builder
@@ -22,7 +23,91 @@ import XCTest
  }
  }
  */
-import Foundation
+
+
+struct Expression {
+    var signature: String
+    var body: String?
+}
+
+extension String {
+    func trim() -> String {
+        return self.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+extension String.SubSequence {
+    func trim() -> String {
+        return self.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+
+func parseExpressions(content: String) -> [Expression] {
+    let lines = content.split(separator: "\n")
+    var expressions: [Expression] = []
+    var currentExpression = Expression(signature: "", body: nil)
+    var bracketCount = 0
+    func inComplexExpression() -> Bool {
+        return bracketCount > 0
+    }
+    func updateLineCounter(text: String) {
+        bracketCount += text.trim().components(separatedBy: "{").count - 1
+        bracketCount -= text.trim().components(separatedBy: "}").count - 1
+    }
+    for line in lines {
+        let isSimpleExpression = !inComplexExpression() && !line.trim().isEmpty && !line.contains("{") && !line.contains("}")
+        if isSimpleExpression {
+            expressions.append(Expression(signature: String(line), body: nil))
+            continue
+        }
+        let isStartOfComplexExpression = !inComplexExpression() && line.contains("{")
+        if isStartOfComplexExpression {
+            bracketCount += 1
+            currentExpression.signature = String(line[..<line.firstIndex(of: "{")!]).trim()
+            // TODO check for end of expression again
+            continue
+        }
+        let isInComplexExpression = inComplexExpression() && !line.contains("}")
+        if isInComplexExpression {
+            if currentExpression.body == nil {
+                currentExpression.body = ""
+            }
+            updateLineCounter(text: String(line))
+            currentExpression.body?.append(String(line.trim()))
+            currentExpression.body?.append("\n")
+        }
+        if line.contains("}") {
+            let occurencies = line.trim().components(separatedBy: "}").count - 1
+            bracketCount -= occurencies
+            let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
+            if remainder.isEmpty {
+                for _ in 0..<occurencies {
+                   currentExpression.body?.append("}\n")
+               }
+            }
+        }
+        let isEndOfComplexExpression = line.contains("}") && bracketCount == 0
+        if isEndOfComplexExpression {
+            
+            let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
+            if !remainder.isEmpty {
+                currentExpression.body?.append(remainder)
+                currentExpression.body?.append("\n")
+            }
+            
+            if currentExpression.body?.hasSuffix("}\n") ?? false {
+                currentExpression.body?.removeLast(2)
+            }
+
+            expressions.append(currentExpression)
+            currentExpression = Expression(signature: "", body: nil)
+        }
+
+    }
+    return expressions
+}
+
 
 
 struct Field: Codable {
@@ -39,18 +124,20 @@ struct Struct: Codable {
 
 
 struct StructParser {
-    func parseStruct(content: String) -> Struct? {
-        if numberOfStructs(content: content) != 1 { return nil }
-        let expressions = parseExpressions(content: content)
-        guard let str = expressions.first(where: {expression in expression.signature.contains("struct")}) else {
-            return nil
-        }
-        let name = parseStructName(str)
-        guard let body = str.body else {
+    
+    func parseStructs(content: String ) -> [Struct] {
+        return parseExpressions(content: content)
+            .filter { expression in expression.signature.contains("struct") }
+            .compactMap { expression in constructStruct(expression: expression) }
+    }
+    
+    private func constructStruct(expression: Expression) -> Struct? {
+        let name = parseStructName(expression)
+        guard let body = expression.body else {
             return nil
         }
         let fields = parseFields(body: body)
-        let generics = parseGenerics(str: str)
+        let generics = parseGenerics(str: expression)
         return Struct(name: name, fields: fields, generics: generics)
     }
 
@@ -89,7 +176,7 @@ struct StructParser {
     
     private func parseFields(body: String) -> [Field] {
         var fields = [Field]()
-        var bodyWithoutEnclosingBrackets = body
+        let bodyWithoutEnclosingBrackets = body
         let expressions = parseExpressions(content: bodyWithoutEnclosingBrackets)
         
         for expression in expressions {
@@ -129,14 +216,17 @@ struct StructParser {
 
 struct BuilderGenerator {
     
-    func generateBuilder(file: String) -> String {
+    func generateBuilders(file: String) -> String {
         let structParser = StructParser()
-        let parsedStruct = structParser.parseStruct(content: file)
-        guard let parsedStruct = parsedStruct else {
+        let parsedStructs = structParser.parseStructs(content: file)
+        if parsedStructs.isEmpty {
             return ""
         }
         var file = "\n"
-        file += generateBuilderStruct(str: parsedStruct)
+        for parsedStruct in parsedStructs {
+            file += generateBuilderStruct(str: parsedStruct)
+            file += "\n"
+        }
         return file
     }
     
@@ -169,7 +259,7 @@ struct BuilderGenerator {
             return "\"\""
         } else if field.type == "Int" {
             return "0"
-        } else if field.type == "Float" {
+        } else if field.type == "Float" || field.type == "Double" {
             return "0.0"
         } else if field.type == "Bool" {
             return "false"
@@ -217,18 +307,6 @@ struct MyProfile: Profile {
 }
 """
     
-    func test_parse_struct_should_return_nil_if_file_contains_multiple_structs() throws {
-        // arrange
-        let content = """
-        \(singleStruct)
-        \(singleStruct)
-        """
-        // act
-        let resultStruct = StructParser().parseStruct(content: content)
-        // assert
-        XCTAssertNil(resultStruct)
-        
-    }
     
     func test_parse_struct_should_return_nil_if_file_contains_a_class() throws {
         // arrange
@@ -239,9 +317,9 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)
         // assert
-        XCTAssertNil(resultStruct)
+        XCTAssertTrue(resultStruct.isEmpty)
     }
     
     func test_parse_struct_should_contain_name_of_struct() throws {
@@ -250,9 +328,9 @@ struct MyProfile: Profile {
         \(singleStruct)
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.name, "MyProfile")
+        XCTAssertEqual(resultStruct.name, "MyProfile")
     }
     
     func test_parse_struct_parses_all_fields() throws {
@@ -261,9 +339,9 @@ struct MyProfile: Profile {
         \(singleStruct)
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields.count, 2)
+        XCTAssertEqual(resultStruct.fields.count, 2)
     }
     
     func test_parse_struct_parses_all_fields_with_spacing() throws {
@@ -275,9 +353,9 @@ struct MyProfile: Profile {
         }
 """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields.count, 2)
+        XCTAssertEqual(resultStruct.fields.count, 2)
     }
     
     func test_parse_struct_parses_correct_field_names() {
@@ -286,10 +364,10 @@ struct MyProfile: Profile {
         \(singleStruct)
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields[0].name, "name")
-        XCTAssertEqual(resultStruct?.fields[1].name, "age")
+        XCTAssertEqual(resultStruct.fields[0].name, "name")
+        XCTAssertEqual(resultStruct.fields[1].name, "age")
     }
     
     func test_parse_struct_parses_correct_types() {
@@ -298,10 +376,10 @@ struct MyProfile: Profile {
         \(singleStruct)
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields[0].type, "String")
-        XCTAssertEqual(resultStruct?.fields[1].type, "Int")
+        XCTAssertEqual(resultStruct.fields[0].type, "String")
+        XCTAssertEqual(resultStruct.fields[1].type, "Int")
     }
     
     func test_parse_struct_parses_correct_optional_types() {
@@ -313,10 +391,10 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields[0].optional, false)
-        XCTAssertEqual(resultStruct?.fields[1].optional, true)
+        XCTAssertEqual(resultStruct.fields[0].optional, false)
+        XCTAssertEqual(resultStruct.fields[1].optional, true)
     }
     
     func test_parse_struct_ignores_computed_properties() {
@@ -331,9 +409,9 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields.count, 2)
+        XCTAssertEqual(resultStruct.fields.count, 2)
     }
     
     func test_parse_struct_parses_correct_names_with_default_values() {
@@ -345,10 +423,10 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields[0].name, "name")
-        XCTAssertEqual(resultStruct?.fields[1].name, "age")
+        XCTAssertEqual(resultStruct.fields[0].name, "name")
+        XCTAssertEqual(resultStruct.fields[1].name, "age")
     }
     
     func test_parse_struct_ignores_coding_keys() {
@@ -364,9 +442,9 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.fields.count, 2)
+        XCTAssertEqual(resultStruct.fields.count, 2)
     }
     
     func test_parse_should_ignore_imports_when_parsing_name() {
@@ -379,9 +457,9 @@ struct MyProfile: Profile {
         }
         """
         // act
-        let resultStruct = StructParser().parseStruct(content: content)
+        let resultStruct = StructParser().parseStructs(content: content)[0]
         // assert
-        XCTAssertEqual(resultStruct?.name, "MyProfile")
+        XCTAssertEqual(resultStruct.name, "MyProfile")
     }
     
 }
@@ -398,7 +476,7 @@ class BuilderGeneratorTests: XCTestCase {
         }
         """
         // act
-        let result = BuilderGenerator().generateBuilder(file: content)
+        let result = BuilderGenerator().generateBuilders(file: content)
         // assert
         XCTAssertEqual(result.contains("struct MyProfileBuilder"), true)
     }
@@ -413,7 +491,7 @@ class BuilderGeneratorTests: XCTestCase {
         }
         """
         // act
-        let result = BuilderGenerator().generateBuilder(file: content)
+        let result = BuilderGenerator().generateBuilders(file: content)
         // assert
         XCTAssertEqual(result.contains("var name: String = \"\""), true)
         XCTAssertEqual(result.contains("var age: Int = 0"), true)
@@ -427,6 +505,7 @@ class BuilderGeneratorTests: XCTestCase {
             var name: String
             let age: Int
             let height: Float
+            let height2: Double
             let isActive: Bool
             let friends: [String]
             let nullableFriends: [String]?
@@ -435,11 +514,12 @@ class BuilderGeneratorTests: XCTestCase {
         }
         """
         // act
-        let result = BuilderGenerator().generateBuilder(file: content)
+        let result = BuilderGenerator().generateBuilders(file: content)
         // assert
         XCTAssertEqual(result.contains("var name: String = \"\""), true)
         XCTAssertEqual(result.contains("var age: Int = 0"), true)
         XCTAssertEqual(result.contains("var height: Float = 0.0"), true)
+        XCTAssertEqual(result.contains("var height2: Double = 0.0"), true)
         XCTAssertEqual(result.contains("var isActive: Bool = false"), true)
         XCTAssertEqual(result.contains("var friends: [String] = []"), true)
         XCTAssertEqual(result.contains("var nullableFriends: [String]?"), true)
@@ -464,7 +544,7 @@ class BuilderGeneratorTests: XCTestCase {
             }
             """
         // act
-        let result = BuilderGenerator().generateBuilder(file: content)
+        let result = BuilderGenerator().generateBuilders(file: content)
         // assert
         XCTAssertEqual(result.contains("var firstName: String?"), true)
         XCTAssertFalse(result.contains("fullName"))
@@ -484,11 +564,150 @@ class BuilderGeneratorTests: XCTestCase {
         }
         """
         // act
-        let result = BuilderGenerator().generateBuilder(file: content)
+        let result = BuilderGenerator().generateBuilders(file: content)
         // assert
         XCTAssertTrue(result.contains("var items: [T] = []"))
         XCTAssertTrue(result.contains("var paging: ContentPaging?"))
         XCTAssertTrue(result.contains("struct ContentPageBuilder<T:Codable> {"))
     }
     
+}
+
+class ExpressionParserTests: XCTestCase {
+    
+    func test_parseExpressions_parses_simple_expressions() {
+        // arrange
+        let content = """
+var firstName: String?
+
+var fullName: String {
+    var fullName = PersonNameComponents()
+    fullName.givenName = firstName
+    fullName.middleName = middleName
+    fullName.familyName = lastName
+    return PersonNameFormatter.longNameFormatter.string(from: fullName)
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertTrue(result.contains(where: {expression in
+            expression.signature == "var firstName: String?" &&
+                expression.body == nil
+        }))
+    }
+    
+    func test_parseExpressions_does_not_parse_empty_lines() {
+        // arrange
+        let content = """
+var firstName: String?
+
+ 
+var fullName: String {
+    var fullName = PersonNameComponents()
+    fullName.givenName = firstName
+    fullName.middleName = middleName
+    fullName.familyName = lastName
+    return PersonNameFormatter.longNameFormatter.string(from: fullName)
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertFalse(result.contains(where: { expression in
+            expression.signature == "" || expression.signature == " "
+        }))
+    }
+    
+    func test_parseExpressions_parses_signature_of_complex_expression() {
+        // arrange
+        let content = """
+var firstName: String?
+
+var fullName: String {
+    var fullName = PersonNameComponents()
+    fullName.givenName = firstName
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertTrue(result.contains(where: {expression in
+            expression.signature == "var fullName: String"
+        }))
+    }
+    
+    func test_parseExpressions_parses_body_of_complex_expression() {
+        // arrange
+        let content = """
+var fullName: String {
+    var fullName = PersonNameComponents()
+    fullName.givenName = firstName
+    fullName.surename = firstName
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertTrue(result.contains(where: {expression in
+            expression.signature == "var fullName: String" &&
+                expression.body!.contains("var fullName = PersonNameComponents()\nfullName.givenName = firstName\nfullName.surename = firstName\n")
+        }))
+    }
+    
+    func test_parseExpressions_parses_body_of_complex_expression_with_content_before_end_bracket() {
+        // arrange
+        let content = """
+var fullName: String {
+    var fullName = PersonNameComponents()
+    fullName.surename = nil}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertTrue(result.contains(where: {expression in
+            expression.signature == "var fullName: String" &&
+                expression.body!.contains("var fullName = PersonNameComponents()\nfullName.surename = nil\n")
+        }))
+    }
+    
+    
+    func test_parseExpressions_parses_body_of_nested_complex_expressions() {
+        // arrange
+        let content = """
+func someFunc() -> String {
+    var computedProperty: String {
+        return "some"
+    }
+    var computedProperty: String {
+        return "some"
+    }
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertEqual(
+            result[0].body,
+            "var computedProperty: String {\nreturn \"some\"\n}\nvar computedProperty: String {\nreturn \"some\"\n}\n")
+    }
+    
+    func test_parseExpressions_parses_body_of_nested_inner_funcs() {
+        // arrange
+        let content = """
+func someFunc() -> String {
+    func nestedFunc() -> String {
+        
+    }
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertEqual(
+            result[0].body,
+            "func nestedFunc() -> String {\n\n}\n")
+            
+            
+    }
 }

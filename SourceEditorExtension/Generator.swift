@@ -106,18 +106,20 @@ struct Struct: Codable {
 
 
 struct StructParser {
-    func parseStruct(content: String) -> Struct? {
-        if numberOfStructs(content: content) != 1 { return nil }
-        let expressions = parseExpressions(content: content)
-        guard let str = expressions.first(where: {expression in expression.signature.contains("struct")}) else {
-            return nil
-        }
-        let name = parseStructName(str)
-        guard let body = str.body else {
+    
+    func parseStructs(content: String ) -> [Struct] {
+        return parseExpressions(content: content)
+            .filter { expression in expression.signature.contains("struct") }
+            .compactMap { expression in constructStruct(expression: expression) }
+    }
+    
+    private func constructStruct(expression: Expression) -> Struct? {
+        let name = parseStructName(expression)
+        guard let body = expression.body else {
             return nil
         }
         let fields = parseFields(body: body)
-        let generics = parseGenerics(str: str)
+        let generics = parseGenerics(str: expression)
         return Struct(name: name, fields: fields, generics: generics)
     }
 
@@ -156,7 +158,7 @@ struct StructParser {
     
     private func parseFields(body: String) -> [Field] {
         var fields = [Field]()
-        var bodyWithoutEnclosingBrackets = body
+        let bodyWithoutEnclosingBrackets = body
         let expressions = parseExpressions(content: bodyWithoutEnclosingBrackets)
         
         for expression in expressions {
@@ -196,14 +198,17 @@ struct StructParser {
 
 struct BuilderGenerator {
     
-    func generateBuilder(file: String) -> String {
+    func generateBuilders(file: String) -> String {
         let structParser = StructParser()
-        let parsedStruct = structParser.parseStruct(content: file)
-        guard let parsedStruct = parsedStruct else {
+        let parsedStructs = structParser.parseStructs(content: file)
+        if parsedStructs.isEmpty {
             return ""
         }
         var file = "\n"
-        file += generateBuilderStruct(str: parsedStruct)
+        for parsedStruct in parsedStructs {
+            file += generateBuilderStruct(str: parsedStruct)
+            file += "\n"
+        }
         return file
     }
     
@@ -236,7 +241,7 @@ struct BuilderGenerator {
             return "\"\""
         } else if field.type == "Int" {
             return "0"
-        } else if field.type == "Float" {
+        } else if field.type == "Float" || field.type == "Double" {
             return "0.0"
         } else if field.type == "Bool" {
             return "false"
@@ -271,6 +276,4 @@ struct BuilderGenerator {
     }
     
 }
-
-
 

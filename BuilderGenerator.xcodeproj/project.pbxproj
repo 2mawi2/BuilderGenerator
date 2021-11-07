@@ -16,7 +16,6 @@
 		AC0F436C27369863006FA25C /* SourceEditorExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AC0F435D27369863006FA25C /* SourceEditorExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AC0F43722736A2F8006FA25C /* Foo.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0F43712736A2F8006FA25C /* Foo.swift */; };
 		AC3DE8C42736B618006BC865 /* Generator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3DE8C32736B618006BC865 /* Generator.swift */; };
-		AC475AC22737D5B600C81D6F /* ExpressionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC475AC12737D5B600C81D6F /* ExpressionParserTests.swift */; };
 		ACDD483A2736AA2E0009CECB /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC0F435F27369863006FA25C /* Cocoa.framework */; };
 		ACDD483D2736AA2F0009CECB /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC0F436127369863006FA25C /* XcodeKit.framework */; };
 		ACDD483E2736AA2F0009CECB /* XcodeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AC0F436127369863006FA25C /* XcodeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -83,7 +82,6 @@
 		AC0F436927369863006FA25C /* SourceEditorExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SourceEditorExtension.entitlements; sourceTree = "<group>"; };
 		AC0F43712736A2F8006FA25C /* Foo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Foo.swift; sourceTree = "<group>"; };
 		AC3DE8C32736B618006BC865 /* Generator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generator.swift; sourceTree = "<group>"; };
-		AC475AC12737D5B600C81D6F /* ExpressionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpressionParserTests.swift; sourceTree = "<group>"; };
 		ACDD48AC2736B4AE0009CECB /* BuilderGeneratorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuilderGeneratorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACDD48BC2736B4DF0009CECB /* BuilderGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BuilderGeneratorTests.swift; sourceTree = "<group>"; };
 		ACDD48BD2736B4DF0009CECB /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -185,7 +183,6 @@
 			children = (
 				ACDD48BC2736B4DF0009CECB /* BuilderGeneratorTests.swift */,
 				ACDD48BD2736B4DF0009CECB /* Info.plist */,
-				AC475AC12737D5B600C81D6F /* ExpressionParserTests.swift */,
 			);
 			path = BuilderGeneratorTests;
 			sourceTree = "<group>";
@@ -341,7 +338,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC475AC22737D5B600C81D6F /* ExpressionParserTests.swift in Sources */,
 				ACDD48BE2736B4DF0009CECB /* BuilderGeneratorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -12,7 +12,7 @@ class SourceEditorCommand: NSObject, XCSourceEditorCommand {
 
     func perform(with invocation: XCSourceEditorCommandInvocation, completionHandler: @escaping (Error?) -> Void ) -> Void {
         defer { completionHandler(nil) }
-        let file = BuilderGenerator().generateBuilder(file: invocation.buffer.completeBuffer)
+        let file = BuilderGenerator().generateBuilders(file: invocation.buffer.completeBuffer)
         invocation.buffer.completeBuffer.append(file)
     }
 }
