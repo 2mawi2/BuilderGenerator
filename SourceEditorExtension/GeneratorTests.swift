@@ -1,7 +1,16 @@
+//
+//  GeneratorTests.swift
+//  SourceEditorExtension
+//
+//  Created by Marius Wichtner on 09.11.21.
+//
+
+import Foundation
+
 import XCTest
 import Foundation
 
-@testable import SourceEditorExtension
+
 
 class StructParserTests: XCTestCase {
     

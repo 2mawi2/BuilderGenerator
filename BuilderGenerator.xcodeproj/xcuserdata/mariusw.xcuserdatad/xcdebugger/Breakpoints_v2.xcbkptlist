@@ -7,22 +7,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "DEA9545D-C874-4EAA-90EA-DB8C171E7012"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "323"
-            endingLineNumber = "323"
-            landmarkName = "test_parse_struct_should_return_nil_if_file_contains_a_class()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "B337B811-6D3A-48E0-9AE7-715FB4537475"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -30,9 +14,9 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "527"
-            endingLineNumber = "527"
-            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values_all_possible_types()"
+            startingLineNumber = "196"
+            endingLineNumber = "196"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -46,9 +30,9 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "525"
-            endingLineNumber = "525"
-            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values_all_possible_types()"
+            startingLineNumber = "194"
+            endingLineNumber = "194"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -62,9 +46,9 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "528"
-            endingLineNumber = "528"
-            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values_all_possible_types()"
+            startingLineNumber = "197"
+            endingLineNumber = "197"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -78,57 +62,9 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "559"
-            endingLineNumber = "559"
-            landmarkName = "test_generate_builder_can_handle_generics()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "AE8C954F-BBD3-4E3B-BC4A-BE0A0764C0B6"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "parseStructs(content:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "90A6A2D8-87F8-4279-A21A-D9342E185490"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "159"
-            endingLineNumber = "159"
-            landmarkName = "StructParser"
-            landmarkType = "14">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "795DE888-91E6-4D78-B6B1-69DC5CA26091"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "330"
-            endingLineNumber = "330"
-            landmarkName = "test_parse_struct_should_contain_name_of_struct()"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values_all_possible_types()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -142,9 +78,9 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "530"
-            endingLineNumber = "530"
-            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values_all_possible_types()"
+            startingLineNumber = "199"
+            endingLineNumber = "199"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -158,10 +94,10 @@
             filePath = "BuilderGeneratorTests/BuilderGeneratorTests.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "531"
-            endingLineNumber = "531"
-            landmarkName = "BuilderGeneratorTests"
-            landmarkType = "3">
+            startingLineNumber = "200"
+            endingLineNumber = "200"
+            landmarkName = "test_generate_builder_considers_all_fields_with_correct_default_values()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
