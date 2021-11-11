@@ -19,16 +19,27 @@ func parseExpressions(content: String) -> [Expression] {
         if isStartOfComplexExpression(bracketCount, line) {
             bracketCount += 1
             currentExpression.signature = String(line[..<line.firstIndex(of: "{")!]).trim()
-            // TODO check for end of expression again
+            
+            let remainingLine = String(line[line.firstIndex(of: "{")!...]).trim().remove("{")
+            if remainingLine.contains("}") {
+                let occurencies = remainingLine.trim().components(separatedBy: "}").count - 1
+                bracketCount -= occurencies
+                if isEndOfComplexExpression(String.SubSequence(remainingLine), bracketCount) {
+                    let remainder = String(remainingLine[..<remainingLine.firstIndex(of: "}")!]).trim()
+                    if !remainder.isEmpty {
+                        currentExpression.appendOrSetBody(remainder)
+                    }
+                    expressions.append(currentExpression)
+                    currentExpression = Expression(signature: "", body: nil)
+                }
+            }
+            
             continue
         }
         if isInComplexExpression(bracketCount, line) {
-            if currentExpression.body == nil {
-                currentExpression.body = ""
-            }
             bracketCount = calculateNewBracketCount(bracketCount, String(line))
-            currentExpression.body?.append(String(line.trim()))
-            currentExpression.body?.append("\n")
+            currentExpression.appendOrSetBody(String(line.trim()))
+            currentExpression.appendOrSetBody("\n")
         }
         if line.contains("}") {
             let occurencies = line.trim().components(separatedBy: "}").count - 1
@@ -36,15 +47,15 @@ func parseExpressions(content: String) -> [Expression] {
             let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
             if remainder.isEmpty {
                 for _ in 0..<occurencies {
-                   currentExpression.body?.append("}\n")
+                    currentExpression.appendOrSetBody("}\n")
                }
             }
         }
         if isEndOfComplexExpression(line, bracketCount) {
             let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
             if !remainder.isEmpty {
-                currentExpression.body?.append(remainder)
-                currentExpression.body?.append("\n")
+                currentExpression.appendOrSetBody(remainder)
+                currentExpression.appendOrSetBody("\n")
             }
             
             if currentExpression.body?.hasSuffix("}\n") ?? false {

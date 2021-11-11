@@ -147,4 +147,32 @@ func someFunc() -> String {
             
             
     }
+    
+    func test_parseExpressions_parses_body_of_single_line_functions() {
+        // arrange
+        let content = """
+func someFunc() -> String { return "sampleString" }
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertEqual(
+            result[0].body,
+            "return \"sampleString\"")
+    }
+    
+    func test_parseExpressions_parses_body_of_nested_complex_expressions_with_single_line_function() {
+        // arrange
+        let content = """
+func someFunc() -> String {
+    var computedProperty: String { return "some" }
+}
+"""
+        // act
+        let result = parseExpressions(content: content)
+        // assert
+        XCTAssertTrue(
+            result[0].body!.contains("var computedProperty: String { return \"some\"")
+        )
+    }
 }
