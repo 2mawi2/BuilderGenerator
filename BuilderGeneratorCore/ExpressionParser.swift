@@ -6,95 +6,73 @@
 //
 
 import Foundation
+import SwiftUI
+
+typealias Iterator = IndexingIterator<[String]>
+
+class ComplexExpressionParser {
+    
+    func parse(_ iterator: inout Iterator, _ currentLine: String) -> Expression {
+        return newBracketCount(0, currentLine) == 0
+            ? parseSingleLineExpression(currentLine)
+            : parseMultilineExpression(currentLine, &iterator)
+    }
+    
+    private func signature(of currentLine: String) -> String {
+        return String(currentLine[..<currentLine.firstIndex(of: "{")!]).trim()
+    }
+    
+    private func remainder(of currentLine: String) -> String {
+        return String(currentLine[currentLine.firstIndex(of: "{")!...]).trim()
+    }
+    
+    private func parseSingleLineExpression(_ currentLine: String) -> Expression {
+        let body = remainder(of: currentLine).remove("{").remove("}").trim()
+        return Expression(signature: signature(of: currentLine), body: body)
+    }
+    
+    private func parseMultilineExpression(_ currentLine: String, _ iterator: inout Iterator) -> Expression {
+        var bracketCount = newBracketCount(0, currentLine)
+        var body = remainder(of: currentLine).remove("{")
+        while let nextLine = iterator.next(), bracketCount > 0 {
+            bracketCount = newBracketCount(bracketCount, nextLine)
+            var trimmedLine = nextLine.trim()
+            if bracketCount == 0 && trimmedLine.hasSuffix("}") {
+                trimmedLine.removeLast()
+            }
+            if !trimmedLine.isEmpty {
+                body.append(contentsOf: trimmedLine + "\n")
+            }
+        }
+        return Expression(signature: signature(of: currentLine), body: body)
+    }
+    
+    private func newBracketCount(_ bracketCount: Int, _ text: String) -> Int {
+        return bracketCount + text.count("{") - text.count("}")
+    }
+}
+
+class ExpressionParser {
+    func parse(content: String) -> [Expression] {
+        var expressions: [Expression] = []
+        var lineIterator = content.split(separator: "\n").map { String($0) }.makeIterator()
+        while let current = lineIterator.next() {
+            if current.trim().isEmpty {
+                continue
+            }
+            let isSimple = !current.contains("{")
+            if isSimple {
+                expressions.append(Expression(signature: current, body: nil))
+            } else {
+                let complexExpression = ComplexExpressionParser().parse(&lineIterator, current)
+                expressions.append(complexExpression)
+            }
+        }
+        return expressions
+    }
+}
 
 func parseExpressions(content: String) -> [Expression] {
-    var expressions: [Expression] = []
-    var currentExpression = Expression(signature: "", body: nil)
-    var bracketCount = 0
-    for line in content.split(separator: "\n") {
-        if isSimpleExpression(bracketCount, line) {
-            expressions.append(Expression(signature: String(line), body: nil))
-            continue
-        }
-        if isStartOfComplexExpression(bracketCount, line) {
-            bracketCount += 1
-            currentExpression.signature = String(line[..<line.firstIndex(of: "{")!]).trim()
-            
-            let remainingLine = String(line[line.firstIndex(of: "{")!...]).trim().remove("{")
-            if remainingLine.contains("}") {
-                let occurencies = remainingLine.trim().components(separatedBy: "}").count - 1
-                bracketCount -= occurencies
-                if isEndOfComplexExpression(String.SubSequence(remainingLine), bracketCount) {
-                    let remainder = String(remainingLine[..<remainingLine.firstIndex(of: "}")!]).trim()
-                    if !remainder.isEmpty {
-                        currentExpression.appendOrSetBody(remainder)
-                    }
-                    expressions.append(currentExpression)
-                    currentExpression = Expression(signature: "", body: nil)
-                }
-            }
-            
-            continue
-        }
-        if isInComplexExpression(bracketCount, line) {
-            bracketCount = calculateNewBracketCount(bracketCount, String(line))
-            currentExpression.appendOrSetBody(String(line.trim()))
-            currentExpression.appendOrSetBody("\n")
-        }
-        if line.contains("}") {
-            let occurencies = line.trim().components(separatedBy: "}").count - 1
-            bracketCount -= occurencies
-            let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
-            if remainder.isEmpty {
-                for _ in 0..<occurencies {
-                    currentExpression.appendOrSetBody("}\n")
-               }
-            }
-        }
-        if isEndOfComplexExpression(line, bracketCount) {
-            let remainder = String(line[..<line.firstIndex(of: "}")!]).trim()
-            if !remainder.isEmpty {
-                currentExpression.appendOrSetBody(remainder)
-                currentExpression.appendOrSetBody("\n")
-            }
-            
-            if currentExpression.body?.hasSuffix("}\n") ?? false {
-                currentExpression.body?.removeLast(2)
-            }
-
-            expressions.append(currentExpression)
-            currentExpression = Expression(signature: "", body: nil)
-        }
-
-    }
-    return expressions
-}
-
-
-private func calculateNewBracketCount(_ bracketCount: Int,_ text: String) -> Int {
-    var newBracketCount = bracketCount
-    newBracketCount += text.trim().components(separatedBy: "{").count - 1
-    newBracketCount -= text.trim().components(separatedBy: "}").count - 1
-    return newBracketCount
-}
-
-private func inComplexExpression(_ bracketCount: Int) -> Bool {
-    return bracketCount > 0
-}
-
-private func isSimpleExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
-    return !inComplexExpression(bracketCount) && !line.trim().isEmpty && !line.contains("{") && !line.contains("}")
-}
-
-private func isStartOfComplexExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
-    return !inComplexExpression(bracketCount) && line.contains("{")
-}
-
-private func isInComplexExpression(_ bracketCount: Int, _ line: String.SubSequence) -> Bool {
-    return inComplexExpression(bracketCount) && !line.contains("}")
-}
-
-private func isEndOfComplexExpression(_ line: String.SubSequence, _ bracketCount: Int) -> Bool {
-    return line.contains("}") && bracketCount == 0
+    return ExpressionParser().parse(content: content)
 }
 

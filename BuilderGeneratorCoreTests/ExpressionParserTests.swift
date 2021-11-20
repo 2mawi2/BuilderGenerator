@@ -143,7 +143,7 @@ func someFunc() -> String {
         // assert
         XCTAssertEqual(
             result[0].body,
-            "func nestedFunc() -> String {\n\n}\n")
+            "func nestedFunc() -> String {\n}\n")
             
             
     }

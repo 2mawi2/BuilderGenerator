@@ -15,6 +15,10 @@ extension String {
     func remove(_ subString: String) -> String {
         return self.replacingOccurrences(of: subString, with: "")
     }
+    
+    func count(_ subString: String) -> Int {
+        return self.trim().components(separatedBy: subString).count - 1
+    }
 }
 
 extension String.SubSequence {
