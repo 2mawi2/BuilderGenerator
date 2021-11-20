@@ -402,8 +402,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AC0F434527369761006FA25C /* BuilderGenerator */,
 				AC0F435C27369863006FA25C /* SourceEditorExtension */,
+				AC0F434527369761006FA25C /* BuilderGenerator */,
 				AC6E802B273A7D7E00424EBF /* BuilderGeneratorCore */,
 				AC6E8032273A7D7E00424EBF /* BuilderGeneratorCoreTests */,
 			);
