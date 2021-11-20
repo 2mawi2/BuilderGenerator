@@ -21,6 +21,8 @@
 		AC6E804C273A814B00424EBF /* BuilderGeneratorCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC6E802C273A7D7E00424EBF /* BuilderGeneratorCore.framework */; };
 		AC6E804D273A81D500424EBF /* BuilderGenerator.swift in Resources */ = {isa = PBXBuildFile; fileRef = AC3DE8C32736B618006BC865 /* BuilderGenerator.swift */; };
 		AC6E804E273A820A00424EBF /* BuilderGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3DE8C32736B618006BC865 /* BuilderGenerator.swift */; };
+		ACC56CA92749BF17009A97F5 /* ComplexExpressionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC56CA82749BF17009A97F5 /* ComplexExpressionParser.swift */; };
+		ACC56CAA2749BF5D009A97F5 /* ComplexExpressionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC56CA82749BF17009A97F5 /* ComplexExpressionParser.swift */; };
 		ACDB182D273A8FB100A2F284 /* ExpressionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDB182C273A8FB100A2F284 /* ExpressionParser.swift */; };
 		ACDB182E273A902600A2F284 /* ExpressionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDB182C273A8FB100A2F284 /* ExpressionParser.swift */; };
 		ACDB1833273A90D000A2F284 /* String+trim.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDB1832273A90D000A2F284 /* String+trim.swift */; };
@@ -126,6 +128,7 @@
 		AC6E802C273A7D7E00424EBF /* BuilderGeneratorCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BuilderGeneratorCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC6E8033273A7D7E00424EBF /* BuilderGeneratorCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BuilderGeneratorCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC6E803A273A7D7E00424EBF /* BuilderGeneratorCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuilderGeneratorCoreTests.swift; sourceTree = "<group>"; };
+		ACC56CA82749BF17009A97F5 /* ComplexExpressionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplexExpressionParser.swift; sourceTree = "<group>"; };
 		ACDB182C273A8FB100A2F284 /* ExpressionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpressionParser.swift; sourceTree = "<group>"; };
 		ACDB1832273A90D000A2F284 /* String+trim.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+trim.swift"; sourceTree = "<group>"; };
 		ACDB1835273A90E700A2F284 /* Expression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Expression.swift; sourceTree = "<group>"; };
@@ -242,8 +245,9 @@
 				ACDB1842273A92FF00A2F284 /* Extensions */,
 				ACDB1841273A919000A2F284 /* Model */,
 				AC3DE8C32736B618006BC865 /* BuilderGenerator.swift */,
-				ACDB182C273A8FB100A2F284 /* ExpressionParser.swift */,
 				ACDB1838273A914900A2F284 /* StructParser.swift */,
+				ACDB182C273A8FB100A2F284 /* ExpressionParser.swift */,
+				ACC56CA82749BF17009A97F5 /* ComplexExpressionParser.swift */,
 			);
 			path = BuilderGeneratorCore;
 			sourceTree = "<group>";
@@ -458,6 +462,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACDB182E273A902600A2F284 /* ExpressionParser.swift in Sources */,
+				ACC56CAA2749BF5D009A97F5 /* ComplexExpressionParser.swift in Sources */,
 				AC6E804E273A820A00424EBF /* BuilderGenerator.swift in Sources */,
 				ACDB1833273A90D000A2F284 /* String+trim.swift in Sources */,
 				AC0F436527369863006FA25C /* SourceEditorExtension.swift in Sources */,
@@ -479,6 +484,7 @@
 				ACDB183D273A916E00A2F284 /* Field.swift in Sources */,
 				ACDB1834273A90D000A2F284 /* String+trim.swift in Sources */,
 				ACDB183A273A914900A2F284 /* StructParser.swift in Sources */,
+				ACC56CA92749BF17009A97F5 /* ComplexExpressionParser.swift in Sources */,
 				ACDB1840273A918700A2F284 /* Struct.swift in Sources */,
 				ACDB1837273A90E700A2F284 /* Expression.swift in Sources */,
 			);
