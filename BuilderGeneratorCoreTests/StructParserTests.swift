@@ -94,6 +94,23 @@ struct MyProfile: Profile {
         XCTAssertEqual(resultStruct.fields[1].type, "Int")
     }
     
+    func test_sbould_not_parse_comments() {
+        // arrange
+        let content = """
+        struct ContentDetail: Codable, Equatable { // another comment
+            // Another comment
+            var created: String? // FIXME: convert to date
+        } // another comment
+        """
+        // act
+        let resultStruct = parseStructs(content: content)[0]
+        // assert
+        XCTAssertEqual(resultStruct.name, "ContentDetail")
+        XCTAssertEqual(resultStruct.fields.first?.name, "created")
+        XCTAssertEqual(resultStruct.fields.first?.optional, true)
+        
+    }
+    
     func test_parse_struct_parses_correct_optional_types() {
         // arrange
         let content = """

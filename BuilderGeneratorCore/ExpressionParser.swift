@@ -11,7 +11,11 @@ import SwiftUI
 class ExpressionParser {
     func parse(content: String) -> [Expression] {
         var expressions: [Expression] = []
-        var lineIterator = content.split(separator: "\n").map { String($0) }.makeIterator()
+        var lineIterator = content
+            .split(separator: "\n")
+            .map { String($0) }
+            .map { stripComment(line: $0) }
+            .makeIterator()
         while let current = lineIterator.next() {
             if current.trim().isEmpty {
                 continue
@@ -25,6 +29,12 @@ class ExpressionParser {
             }
         }
         return expressions
+    }
+    
+    private func stripComment(line: String) -> String {
+        return line.contains("//")
+            ? String(line[..<line.index(of: "//")!]).trim()
+            : line
     }
 }
 

@@ -26,3 +26,9 @@ extension String.SubSequence {
         return self.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
+extension StringProtocol {
+    func index<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> Index? {
+        range(of: string, options: options)?.lowerBound
+    }
+}
