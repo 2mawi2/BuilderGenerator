@@ -33,7 +33,7 @@ class ComplexExpressionParser {
     private func parseMultilineExpression(_ currentLine: String, _ iterator: inout Iterator) -> Expression {
         var bracketCount = newBracketCount(0, currentLine)
         var body = remainder(of: currentLine).remove("{")
-        while let nextLine = iterator.next(), bracketCount > 0 {
+        while bracketCount > 0, let nextLine = iterator.next() {
             bracketCount = newBracketCount(bracketCount, nextLine)
             var trimmedLine = nextLine.trim()
             if bracketCount == 0 && trimmedLine.hasSuffix("}") {

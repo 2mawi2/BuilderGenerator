@@ -159,6 +159,25 @@ struct MyProfile: Profile {
         XCTAssertEqual(resultStruct.fields.count, 2)
     }
     
+    func test_parse_struct_can_handle_complex_expressions_before_properties() {
+        // arrange
+        let content = """
+        struct ContentDetail: Codable, Equatable {
+            enum CodingKeys: String, CodingKey {
+                case nid = "contentId"
+            }
+
+            var nid: String
+        }
+        """
+        // act
+        let resultStruct = parseStructs(content: content)[0]
+        // assert
+        XCTAssertEqual(resultStruct.fields.count, 1)
+        XCTAssertEqual(resultStruct.fields.first?.type, "String")
+        XCTAssertEqual(resultStruct.fields.first?.name, "nid")
+    }
+    
     func test_parse_should_ignore_imports_when_parsing_name() {
         // arrange
         let content = """
