@@ -12,8 +12,6 @@ An Xcode extension (plugin) to generate struct builders automatically.
 - Go to `System Preferences -> Extensions -> Xcode Source Editor` and make sure `Builder Generator` is enabled.
 - Open Xcode
 
-**Please note if using manual project paths before v0.25 you will have to select your project path again.**
-
 ## How to create a new Swift builder
 
 - Open a file which contains one more structs you wish to generate a builder for.
