@@ -79,3 +79,13 @@ Go to `System Preferences -> Extensions` and deselect the extension under `Xcode
 To remove:
 
 Delete the app.
+
+## Extension doesn’t appear in my editor or in System Extensions
+
+When multiple copies of Xcode are on the same machine, extensions can stop working completely. In this case, Apple Developer Relations suggests re-registering your main copy of Xcode with Launch Services"
+
+```
+$ cd /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support
+
+$ ./lsregister -f /Applications/Your-Xcode.app
+```
